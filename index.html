@@ -1,11 +1,31 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>単語検索</title>
-</head>
-<body>
-  <h1>単語と数字の検索サイト</h1>
-  <p>このページは準備中です。</p>
-</body>
-</html>
+<h2>検索</h2>
+<input type="text" id="searchInput" placeholder="数字または単語で検索">
+<button onclick="search()">検索</button>
+
+<ul id="results"></ul>
+
+<script src="data.js"></script>
+<script>
+function search() {
+  const query = document.getElementById("searchInput").value.trim();
+  const resultArea = document.getElementById("results");
+  resultArea.innerHTML = "";
+
+  const results = wordList.filter(item =>
+    item.number.includes(query) || 
+    item.word.includes(query) || 
+    item.reading.includes(query)
+  );
+
+  if (results.length === 0) {
+    resultArea.innerHTML = "<li>一致する単語が見つかりませんでした。</li>";
+    return;
+  }
+
+  for (const item of results) {
+    const li = document.createElement("li");
+    li.innerHTML = `<strong>${item.number}</strong>: ${item.word}（${item.reading}）<br><small>${item.breakdown}</small>`;
+    resultArea.appendChild(li);
+  }
+}
+</script>
