@@ -1,15 +1,23 @@
 const wordList = [
   {
-    number: "310",
-    word: "砂糖",
-    reading: "さとう",
-    breakdown: "3(さ) + 10(とう)"
-  },
+  number: "310",
+  word: "砂糖",
+  reading: "さとう",
+  readingParts: [
+    { digit: 3,  kana: "サ"  },
+    { digit: 10, kana: "トウ"}
+  ]
+},
+
   {
     number: "104",
     word: "イワシ",
     reading: "いわし",
-    breakdown: "1(い) + 0(わ) + 4(し)"
+    readingParts: [
+    { digit: 1,  kana: "イ"  },
+    { digit: 0, kana: "ワ"},
+      { digit: 4, kana: "シ"}
+  ]
   },
   // 必要に応じて追加
 ];
