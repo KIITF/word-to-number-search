@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>単語検索サイト</title>
+  <title>単語追加サイト</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -16,128 +16,28 @@
     .explanation-popup {
       position: absolute;
       top: 100%; /* ボタンの下に表示 */
-      /* left: 50%; */
       right: 0; /* 親要素の右端に合わせる */
-      /* transform: translateX(-50%); */
       width: max-content;
       max-width: 300px; /* 必要に応じて調整 */
       z-index: 10;
-    }
-    /* 検索入力フィールドの右側にボタンのスペースを確保 */
-    #searchInput {
-        padding-right: 70px; /* Adjust based on button width and padding */
     }
   </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
   <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-2xl">
-    <!-- 見出しの変更 -->
-    <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">5108 Base</h1>
+    <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">単語追加ツール</h1>
 
-    <div class="mb-6 bg-gray-50 p-4 rounded-xl shadow-inner">
-      <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 relative">
-        <div class="relative flex-grow"> <!-- 親要素をrelativeにし、flex-growで幅を確保 -->
-          <input type="text" id="searchInput" placeholder="数字または単語で検索"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 shadow-sm"
-                  oninput="search(true)">
-          <!-- ?検索 説明ボタン - 検索入力ボックスの右端に配置 -->
-          <button id="wildcardHelpButton"
-                  class="absolute right-2 top-1/2 -translate-y-1/2 bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-gray-300 transition duration-200 shadow-sm flex-shrink-0">
-            ?検索
-            <div id="wildcardExplanation" class="explanation-popup hidden bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-sm text-gray-800">
-              <p class="mb-1">?はどの文字としても機能します。</p>
-              <p class="mb-1">「<span class="font-semibold">?と?</span>」と入力すると、</p>
-              <p class="mb-1"><strong>3桁の文字</strong>で<strong>2文字目が「と」</strong>という検索となり、「さとう」などがヒットします。</p>
-              <p class="mb-0">「<span class="font-semibold">?10</span>」など数字による検索も可能です。</p>
-            </div>
-          </button>
-        </div>
-        <button onclick="search(true)"
-                class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200 shadow-md transform hover:scale-105">
-          検索
-        </button>
-        <!-- 単語の追加ボタンをここに追加 -->
-        <button onclick="openAddWordModal()"
-                class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-200 shadow-md transform hover:scale-105">
-          単語の追加
-        </button>
-      </div>
-
-      <!-- 使用する語呂の選択 - 折りたたみ可能 -->
-      <div class="mt-4">
-        <button id="toggleGoros"
-                class="w-full text-left text-blue-600 font-semibold py-2 rounded-lg hover:bg-blue-100 transition duration-200 flex items-center justify-between">
-          <span>使用する語呂の選択</span>
-          <span id="gorosToggleIcon" class="transform transition-transform duration-300">▼</span>
-        </button>
-        <div id="gorosContainer" class="hidden border-t border-gray-200 pt-4 mt-4">
-          <h3 class="text-lg font-semibold mb-3 text-gray-700">語呂選択</h3>
-          <div id="goros" class="grid grid-cols-1 gap-y-2 text-gray-700">
-            <!-- 語呂ブロックはJavaScriptでここに生成されます -->
-          </div>
-        </div>
-      </div>
-
-      <!-- 高度な検索セクションの追加 -->
-      <div class="mt-4">
-        <button id="toggleAdvancedSearch"
-                class="w-full text-left text-blue-600 font-semibold py-2 rounded-lg hover:bg-blue-100 transition duration-200 flex items-center justify-between">
-          <span>高度な検索</span>
-          <span id="advancedSearchToggleIcon" class="transform transition-transform duration-300">▼</span>
-        </button>
-        <div id="advancedSearchContainer" class="hidden border-t border-gray-200 pt-4 mt-4 space-y-4">
-          <h3 class="text-lg font-semibold mb-3 text-gray-700">高度な検索オプション</h3>
-          <div class="space-y-4">
-            <!-- 桁数で検索 (範囲対応) -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">桁数で検索</label>
-              <div class="flex space-x-2">
-                <input type="number" id="minNumberLengthInput" placeholder="最小桁数"
-                            class="w-1/2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400"
-                            onchange="search(false)">
-                <span class="flex items-center text-gray-600">~</span>
-                <input type="number" id="maxNumberLengthInput" placeholder="最大桁数"
-                            class="w-1/2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400"
-                            onchange="search(false)">
-              </div>
-            </div>
-            <!-- 数字の範囲検索 -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">数字の範囲検索</label>
-              <div class="flex space-x-2">
-                <input type="number" id="minNumberInput" placeholder="最小値"
-                            class="w-1/2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400"
-                            onchange="search(false)">
-                <span class="flex items-center text-gray-600">-</span>
-                <input type="number" id="maxNumberInput" placeholder="最大値"
-                            class="w-1/2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400"
-                            onchange="search(false)">
-              </div>
-            </div>
-            <!-- 「含む数字」 -->
-            <div>
-              <label for="numberIncludesInput" class="block text-sm font-medium text-gray-700 mb-1">含む数字</label>
-              <input type="text" id="numberIncludesInput" placeholder="含む数字を入力"
-                      class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400"
-                      oninput="search(false)">
-            </div>
-            <!-- 「含むひらがな」 (ひらがな入力限定) -->
-            <div>
-              <label for="readingIncludesInput" class="block text-sm font-medium text-gray-700 mb-1">含むひらがな</label>
-              <input type="text" id="readingIncludesInput" placeholder="含むひらがなを入力"
-                      class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400"
-                      oninput="search(false)">
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div class="mb-6 bg-gray-50 p-4 rounded-xl shadow-inner flex justify-center">
+      <!-- 単語の追加ボタン -->
+      <button onclick="openAddWordModal()"
+              class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-200 shadow-md transform hover:scale-105">
+        単語を追加
+      </button>
     </div>
 
-    <h2 class="text-2xl font-semibold mb-4 text-gray-800">検索結果</h2>
-    <div id="results" class="bg-gray-50 p-4 rounded-xl shadow-inner min-h-[150px] overflow-y-scroll">
-      <!-- 検索結果はここに表示されます -->
-    </div>
+    <!-- 既存の単語表示エリアは今回は削除（機能として絞り込むため） -->
+    <!-- <h2 class="text-2xl font-semibold mb-4 text-gray-800">登録済み単語（UIでは非表示）</h2> -->
+    <!-- <div id="results" class="hidden"></div> -->
   </div>
 
   <!-- 単語追加モーダル -->
@@ -145,7 +45,7 @@
     <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md">
       <h2 class="text-2xl font-bold mb-4 text-gray-800">単語の追加</h2>
       <form id="addWordForm" class="space-y-4">
-        <!-- 生成される単語、数字、読みの表示エリアを追加 -->
+        <!-- 生成される単語、数字、読みの表示エリア -->
         <div class="mb-4 p-3 border border-blue-200 bg-blue-50 rounded-lg text-base text-gray-800 break-words">
           <span id="finalWordPreview">
             <span class="font-bold">単語:</span> <span class="text-gray-600">未入力</span>
@@ -215,19 +115,20 @@
   </div>
 
   <script type="module">
-    // Firebase SDKのインポート
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.x.x/firebase-app.js";
-    import { getFirestore, collection, getDocs, addDoc, query } from "https://www.gstatic.com/firebasejs/9.x.x/firebase-firestore.js";
+    // Firebase SDKのインポート (バージョンは適宜最新のものに更新してください)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, addDoc, query } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
     // --- Firebaseプロジェクトの設定 ---
-    // Firebaseコンソールの「プロジェクト設定」->「全般」->「マイアプリ」からWebアプリの設定情報をコピーして貼り付けてください
+    // ここにあなたのFirebaseプロジェクトの情報を貼り付けてください
+    // Firebaseコンソールの「プロジェクト設定」->「全般」->「マイアプリ」にあるウェブアプリの設定情報をコピーします
     const firebaseConfig = {
-      apiKey: "AIzaSyAo6EOKTp60q90tlDzgwu_IHzmigZ5J92k",
-      authDomain: "base-d9e8f.firebaseapp.com",
-      projectId: "base-d9e8f",
-      storageBucket: "base-d9e8f.firebasestorage.app",
-      messagingSenderId: "633297830935",
-      appId: "1:633297830935:web:712216514f5945ccdcc852",
+      apiKey: "YOUR_API_KEY", 
+      authDomain: "YOUR_AUTH_DOMAIN", 
+      projectId: "YOUR_PROJECT_ID", 
+      storageBucket: "YOUR_STORAGE_BUCKET", 
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID", 
+      appId: "YOUR_APP_ID"
     };
 
     // Firebaseアプリを初期化
@@ -238,14 +139,10 @@
     // 'words'コレクションへの参照
     const wordsCollection = collection(db, 'words');
 
-    // Firestoreから読み込まれた単語リスト
+    // Firestoreから読み込まれた単語リスト (このコードではUIに直接表示しませんが、内部的に保持します)
     let wordList = []; 
 
     // 数字と読みの対応辞書 (IDとテキストを含むオブジェクトの配列に)
-    // kana_idに日本語を含めるのは、通常は問題ありませんが、
-    // ファイル名やURL、特定のシステム連携など、環境によってはエンコーディングの問題を
-    // 引き起こす可能性があるため、ASCII文字（半角英数字）のみを使用するのがより安全な設計です。
-    // このCanvasの範囲内では問題なく動作します。
     const numberDict = {
       0: [{id: "0_レイ", text: "レイ"}, {id: "0_ゼロ", text: "ゼロ"}, {id: "0_マル", text: "マル"}, {id: "0_オ", text: "オ"}, {id: "0_ワ", text: "ワ"}, {id: "0_オー", text: "オー"}],
       1: [{id: "1_イチ", text: "イチ"}, {id: "1_ヒト", text: "ヒト"}, {id: "1_ヒ", text: "ヒ"}, {id: "1_ワン", text: "ワン"}, {id: "1_イ", text: "イ"}],
@@ -265,9 +162,6 @@
       60: [{id: "60_ロー", text: "ロー"}]
     };
 
-    // 許可されている語呂の読みのIDを保持するSet
-    const allowedKanaIds = new Set();
-
     /**
      * カタカナをひらがなに変換する関数
      * @param {string} kanaString - カタカナ文字列
@@ -279,376 +173,20 @@
       });
     }
 
-    /**
-     * 語呂のブロックを作成して指定されたコンテナに追加します。
-     * @param {HTMLElement} container - ブロックを追加するHTML要素。
-     * @param {string} digit - 数字。
-     * @param {Object} kanaObj - カナオブジェクト {id: "...", text: "..."}。
-     * @param {boolean} displayDigitInKana - 読みの後に数字も表示するかどうか。
-     */
-    function createGorosBlock(container, digit, kanaObj, displayDigitInKana) {
-      const block = document.createElement("button"); // Use button for better accessibility
-      block.type = "button"; // Specify type for button
-      block.textContent = displayDigitInKana ? `${kanaObj.text}(${digit})` : kanaObj.text;
-      block.dataset.kanaId = kanaObj.id; // Store kana ID for easy lookup
-      block.dataset.kanaText = kanaObj.text; // Store kana text for display
-      block.dataset.digit = digit; // Store digit for potential future use
-
-      // 初期スタイリング: すべて選択済み（水色）
-      block.className = "px-3 py-1 rounded-full text-white bg-sky-500 hover:bg-sky-600 transition duration-200 shadow-sm text-sm cursor-pointer flex-shrink-0";
-      allowedKanaIds.add(kanaObj.id); // allowedKanaIdsに最初からすべて追加
-
-      block.addEventListener("click", () => {
-        const currentKanaId = block.dataset.kanaId;
-        if (allowedKanaIds.has(currentKanaId)) {
-          allowedKanaIds.delete(currentKanaId);
-          block.classList.remove("bg-sky-500", "hover:bg-sky-600", "text-white");
-          block.classList.add("bg-gray-200", "hover:bg-gray-300", "text-gray-700");
-        } else {
-          allowedKanaIds.add(currentKanaId);
-          block.classList.remove("bg-gray-200", "hover:bg-gray-300", "text-gray-700");
-          block.classList.add("bg-sky-500", "hover:bg-sky-600", "text-white");
-        }
-        search(false); // 選択変更時に検索結果を更新
-      });
-      container.appendChild(block);
-    }
-
-    /**
-     * 語呂選択ブロックを初期化し、イベントリスナーを設定します。
-     * numberDictから動的にブロックを生成し、allowedKanaIds Setを更新します。
-     */
-    function initializeGoros() {
-      const gorosDiv = document.getElementById("goros"); // Main container for all goros sections
-      gorosDiv.innerHTML = ""; // 既存のコンテンツをクリア
-      allowedKanaIds.clear(); // allowedKanaIdsを初期化
-
-      // 数字をソートして表示順を制御 (0-9, 次に10, その後11以上)
-      const sortedDigits = Object.keys(numberDict).map(Number).sort((a, b) => {
-          // 0-9を先に、次に10、最後に11以上が来るようにソート
-          if (a >= 0 && a <= 9 && b >= 0 && b <= 9) return a - b; // 0-9は通常の数値ソート
-          if (a === 10) return -1; // 10を他の2桁以上の数字より前に
-          if (b === 10) return 1;
-          if (a > 10 && b > 10) return a - b; // 11以上は通常の数値ソート
-          if (a < 10 && b > 9) return -1; // 1桁を2桁以上より前に
-          if (a > 9 && b < 10) return 1; // 2桁以上を1桁より後に
-          return a - b; // Fallback
-      });
-
-      let otherMultiDigitGorosLineContainer = null; // 11以上の語呂のためのコンテナ
-
-      for (const digitNum of sortedDigits) {
-          const digit = String(digitNum); // 辞書検索用に文字列に戻す
-          const kanaObjects = numberDict[digit];
-
-          // 各数字の語呂を表示するためのコンテナ
-          const digitLineContainer = document.createElement("div");
-          // 枠線とシャドウはなし、背景色もなしで詰めて表示
-          digitLineContainer.className = "flex items-center gap-2 mb-2 overflow-x-auto whitespace-nowrap py-1"; // 一行表示、横スクロール、詰め込み
-
-          const digitHeader = document.createElement("span");
-          digitHeader.className = "text-md font-semibold text-gray-800 flex-shrink-0 min-w-[30px]"; // 数字部分の固定幅
-
-          if (kanaObjects) { // kanaObjectsが存在することを確認
-            if (digitNum >= 0 && digitNum <= 9) { // 0-9の数字
-                digitHeader.textContent = digit;
-                digitLineContainer.appendChild(digitHeader);
-                kanaObjects.forEach(kanaObj => createGorosBlock(digitLineContainer, digit, kanaObj, false));
-                gorosDiv.appendChild(digitLineContainer);
-            } else if (digitNum === 10) { // 10の語呂
-                digitHeader.textContent = digit;
-                digitLineContainer.appendChild(digitHeader);
-                kanaObjects.forEach(kanaObj => createGorosBlock(digitLineContainer, digit, kanaObj, false));
-                gorosDiv.appendChild(digitLineContainer);
-            } else if (digitNum > 10) { // 11以上の語呂
-                if (!otherMultiDigitGorosLineContainer) { // 初めて11以上の語呂が登場した時のみコンテナを作成
-                    otherMultiDigitGorosLineContainer = document.createElement("div");
-                    otherMultiDigitGorosLineContainer.className = "flex items-center gap-2 mb-2 overflow-x-auto whitespace-nowrap py-1";
-                    const otherHeader = document.createElement("span");
-                    otherHeader.className = "text-md font-semibold text-gray-800 flex-shrink-0 min-w-[50px]"; // "その他" の固定幅
-                    otherHeader.textContent = "その他";
-                    otherMultiDigitGorosLineContainer.appendChild(otherHeader);
-                    gorosDiv.appendChild(otherMultiDigitGorosLineContainer);
-                }
-                kanaObjects.forEach(kanaObj => createGorosBlock(otherMultiDigitGorosLineContainer, digit, kanaObj, true)); // 数字を読みの後に表示
-            }
-          }
-      }
-    }
-
-    /**
-     * 検索を実行し、結果を表示します。
-     * @param {boolean} useInputQuery - searchInputの値をクエリとして使用するかどうか (true: 使用, false: 使用しない - 主に語呂選択変更時の自動更新用)
-     */
-    function search(useInputQuery = true) {
-      const query = useInputQuery ? document.getElementById("searchInput").value.trim() : "";
-      const resultsDiv = document.getElementById("results");
-      resultsDiv.innerHTML = ""; // 以前の検索結果をクリア
-
-      // 高度な検索オプションの値を取得
-      const minNumberLength = document.getElementById("minNumberLengthInput").value.trim();
-      const maxNumberLength = document.getElementById("maxNumberLengthInput").value.trim();
-      const minNumber = document.getElementById("minNumberInput").value.trim();
-      const maxNumber = document.getElementById("maxNumberInput").value.trim();
-      const numberIncludes = document.getElementById("numberIncludesInput").value.trim();
-      const readingIncludes = document.getElementById("readingIncludesInput").value.trim();
-
-      // クエリと高度な検索オプション、語呂選択に基づいて単語リストをフィルタリング
-      const filtered = wordList.filter(entry => {
-        // 1. メイン検索クエリのチェック（ワイルドカード対応）
-        let matchesQuery = false;
-        if (query === "") {
-            matchesQuery = true; // クエリが空の場合は常にマッチ
-        } else if (query.includes('?')) {
-            // ワイルドカードが含まれる場合
-            const isNumericWildcardQuery = /^[0-9?]+$/.test(query); // クエリが数字と '?' のみで構成されているか判定
-            const regexPattern = '^' + query.replace(/\?/g, '.') + '$'; // `?` を `.` に変換
-            let regex;
-            try {
-                if (isNumericWildcardQuery) {
-                    // 数字のワイルドカードクエリの場合（例: ?1?, ????）
-                    regex = new RegExp(regexPattern); // 数字部分に厳密マッチ
-                    matchesQuery = regex.test(entry.number);
-                } else {
-                    // 文字のワイルドカードクエリの場合（例: は???, ?め?）
-                    regex = new RegExp(regexPattern, 'i'); // 大文字小文字を区別しない
-                    matchesQuery = regex.test(entry.reading); // 読み仮名にワイルドカードを適用
-                }
-            } catch (e) {
-                // 不正な正規表現パターンが発生した場合
-                console.error('Invalid regex pattern for wildcard query:', query, e);
-                matchesQuery = false; // エラー時は一致しないとみなす
-            }
-        } else {
-            // 通常の検索: 数字は完全一致、単語は部分一致
-            matchesQuery = (entry.number === query) || entry.word.includes(query);
-        }
-
-        // 2. 語呂チェック: 読み部分がすべて許可されている語呂に含まれるか
-        // allowedKanaIds には kana_id が、entry.readingParts には kana_id が含まれる
-        const matchesGoros = entry.readingParts.every(part => allowedKanaIds.has(part.kana_id));
-
-        // 3. 桁数で検索 (範囲対応)
-        let matchesLength = true;
-        const entryNumberLength = entry.number.length;
-        if (minNumberLength !== "") {
-            matchesLength = matchesLength && entryNumberLength >= parseInt(minNumberLength);
-        }
-        if (maxNumberLength !== "") {
-            matchesLength = matchesLength && entryNumberLength <= parseInt(maxNumberLength);
-        }
-
-        // 4. 数字の範囲検索
-        let matchesRange = true;
-        const entryNumberInt = parseInt(entry.number); // 単語の数字部分を数値に変換
-        if (!isNaN(entryNumberInt)) { // 数字に変換できる場合のみ
-            if (minNumber !== "") {
-                matchesRange = matchesRange && entryNumberInt >= parseInt(minNumber);
-            }
-            if (maxNumber !== "") {
-                matchesRange = matchesRange && entryNumberInt <= parseInt(maxNumber);
-            }
-        } else if (minNumber !== "" || maxNumber !== "") {
-            // 数字以外のエントリに対して範囲検索が指定された場合はマッチしない
-            matchesRange = false;
-        }
-
-        // 5. 数字に特定の文字を含む単語
-        let matchesNumberIncludes = true;
-        if (numberIncludes !== "") {
-            matchesNumberIncludes = entry.number.includes(numberIncludes); // 複数文字対応
-        }
-
-        // 6. 読みに特定のひらがなを含む単語 (ひらがな入力限定)
-        let matchesReadingIncludes = true;
-        if (readingIncludes !== "") {
-            // 入力がひらがなかどうかをチェック (簡易的なチェック)
-            const isHiragana = (str) => {
-              // 空文字列は有効なひらがなとは見なさない
-              if (str.length === 0) return false;
-              for (let i = 0; i < str.length; i++) {
-                if (!str[i].match(/^[\u3040-\u309F]$/)) { // ひらがなのUnicode範囲
-                  return false;
-                }
-              }
-              return true;
-            };
-
-            if (isHiragana(readingIncludes)) {
-              matchesReadingIncludes = entry.reading.includes(readingIncludes); // 複数文字対応
-            } else {
-              matchesReadingIncludes = false;
-            }
-        }
-        
-        // すべての条件をANDで結合
-        return matchesQuery && matchesGoros && matchesLength && matchesRange && matchesNumberIncludes && matchesReadingIncludes;
-      });
-
-      // Like数とStrange数の差でソート（大きい順）
-      filtered.sort((a, b) => (b.likes - b.stranges) - (a.likes - a.stranges));
-
-      if (filtered.length === 0) {
-        resultsDiv.textContent = "該当なし";
-        resultsDiv.className = "bg-gray-50 p-4 rounded-xl shadow-inner text-center text-gray-600 min-h-[150px] overflow-y-scroll"; // クラスを更新
-        return;
-      }
-
-      // フィルタリングされた各単語エントリを表示
-      filtered.forEach(entry => {
-        const div = document.createElement("div");
-        div.className = "word-entry bg-white p-4 rounded-lg shadow-md mb-3 flex flex-col sm:flex-row items-start sm:items-center justify-between transition duration-200 hover:shadow-lg";
-
-        // 単語情報部分をグリッドで区切る
-        const infoGrid = document.createElement("div");
-        // sm:flex-grow で小さい画面ではスペースを埋め、md:grid で中画面以上ではグリッドに
-        infoGrid.className = "flex-grow grid grid-cols-3 gap-2 mb-2 sm:mb-0 items-baseline";
-
-        const numberSpan = document.createElement("span");
-        numberSpan.className = "text-xl font-bold text-blue-700 col-span-1"; // グリッドの列指定
-        numberSpan.textContent = entry.number;
-
-        const wordSpan = document.createElement("span");
-        wordSpan.className = "text-lg font-semibold text-gray-800 col-span-1"; // グリッドの列指定
-        wordSpan.textContent = entry.word;
-
-        const readingSpan = document.createElement("span");
-        readingSpan.className = "text-md text-gray-600 col-span-1"; // グリッドの列指定
-        readingSpan.textContent = `（${entry.reading}）`;
-
-        infoGrid.appendChild(numberSpan);
-        infoGrid.appendChild(wordSpan);
-        infoGrid.appendChild(readingSpan);
-          
-        // ユーザ名表示を追加
-        const userNameSpan = document.createElement("span");
-        userNameSpan.className = "text-xs text-gray-500 col-span-3 text-right"; // グリッドの最下部に表示
-        userNameSpan.textContent = `by: ${entry.userName || '匿名'}`; // userNameがない場合は'匿名'を表示
-        infoGrid.appendChild(userNameSpan);
-
-        // リアクションボタンとカウント部分
-        const reactionDiv = document.createElement("div");
-        reactionDiv.className = "flex items-center space-x-4 text-gray-600";
-
-        // Likeボタン
-        const likeButton = document.createElement("button");
-        likeButton.className = "flex items-center space-x-1 px-3 py-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition duration-200 transform hover:scale-105 shadow";
-        likeButton.innerHTML = `♡ <span id="likes-${entry.number}">${entry.likes}</span>`;
-        likeButton.onclick = () => {
-          entry.likes++;
-          // リアクションボタンを押しただけでは並び替えは行わない
-          document.getElementById(`likes-${entry.number}`).textContent = entry.likes;
-        };
-
-        // Strangeボタン
-        const strangeButton = document.createElement("button");
-        strangeButton.className = "flex items-center space-x-1 px-3 py-1 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition duration-200 transform hover:scale-105 shadow";
-        strangeButton.innerHTML = `? <span id="stranges-${entry.number}">${entry.stranges}</span>`;
-        strangeButton.onclick = () => {
-          entry.stranges++;
-          // リアクションボタンを押しただけでは並び替えは行わない
-          document.getElementById(`stranges-${entry.number}`).textContent = entry.stranges;
-        };
-
-        reactionDiv.appendChild(likeButton);
-        reactionDiv.appendChild(strangeButton);
-
-        div.appendChild(infoGrid);
-        div.appendChild(reactionDiv);
-        resultsDiv.appendChild(div);
-      });
-      resultsDiv.className = "bg-gray-50 p-4 rounded-xl shadow-inner min-h-[150px] overflow-y-scroll"; // クラスを更新
-    }
-
-    // 語呂選択の折りたたみ機能
-    const toggleGorosButton = document.getElementById("toggleGoros");
-    const gorosContainer = document.getElementById("gorosContainer");
-    const gorosToggleIcon = document.getElementById("gorosToggleIcon");
-
-    toggleGorosButton.addEventListener("click", () => {
-      gorosContainer.classList.toggle("hidden");
-      gorosToggleIcon.classList.toggle("rotate-180"); // アイコンを回転させて開閉を示す
-    });
-
-    // 高度な検索の折りたたみ機能
-    const toggleAdvancedSearchButton = document.getElementById("toggleAdvancedSearch");
-    const advancedSearchContainer = document.getElementById("advancedSearchContainer");
-    const advancedSearchToggleIcon = document.getElementById("advancedSearchToggleIcon");
-
-    toggleAdvancedSearchButton.addEventListener("click", () => {
-      advancedSearchContainer.classList.toggle("hidden");
-      advancedSearchToggleIcon.classList.toggle("rotate-180"); // アイコンを回転させて開閉を示す
-    });
-
-    // ?検索ヘルプの表示ロジック
-    const wildcardHelpButton = document.getElementById("wildcardHelpButton");
-    const wildcardExplanation = document.getElementById("wildcardExplanation");
-    let isExplanationFixed = false; // 説明がクリックで固定されているかどうかのフラグ
-
-    wildcardHelpButton.addEventListener("mouseenter", () => {
-      if (!isExplanationFixed) {
-        wildcardExplanation.classList.remove("hidden");
-      }
-    });
-
-    wildcardHelpButton.addEventListener("mouseleave", () => {
-      if (!isExplanationFixed) {
-        wildcardExplanation.classList.add("hidden");
-      }
-    });
-
-    wildcardHelpButton.addEventListener("click", (event) => {
-      event.stopPropagation(); // ボタンクリックがbodyに伝播するのを防ぐ
-      isExplanationFixed = !isExplanationFixed; // 固定状態をトグル
-      if (isExplanationFixed) {
-        wildcardExplanation.classList.remove("hidden");
-      } else {
-        wildcardExplanation.classList.add("hidden");
-      }
-    });
-
-    // 説明が固定表示されているときに、それ以外の場所をクリックしたら非表示にする
-    document.addEventListener("click", (event) => {
-      if (isExplanationFixed && !wildcardHelpButton.contains(event.target) && !wildcardExplanation.contains(event.target)) {
-        wildcardExplanation.classList.add("hidden");
-        isExplanationFixed = false;
-      }
-    });
-
-    // --- 単語追加モーダル関連のJavaScript ---
-    const addWordModal = document.getElementById("addWordModal");
-    const addWordForm = document.getElementById("addWordForm");
-    const readingPartsContainer = document.getElementById("readingPartsContainer");
+    // --- ヘルプポップオーバーのロジック ---
     const readingPartsHelpButton = document.getElementById("readingPartsHelpButton");
     const readingPartsExplanation = document.getElementById("readingPartsExplanation");
-    const addWordInput = document.getElementById("addWordInput"); // 新しく追加
+    const addWordInput = document.getElementById("addWordInput");
+    let isReadingPartsExplanationFixed = false; 
 
-    let isReadingPartsExplanationFixed = false; // 読みのパーツヘルプがクリックで固定されているかどうかのフラグ
-
-    // 読みのパーツヘルプの表示ロジック
-    readingPartsHelpButton.addEventListener("mouseenter", () => {
-        if (!isReadingPartsExplanationFixed) {
-            readingPartsExplanation.classList.remove("hidden");
-        }
-    });
-
-    readingPartsHelpButton.addEventListener("mouseleave", () => {
-        if (!isReadingPartsExplanationFixed) {
-            readingPartsExplanation.classList.add("hidden");
-        }
-    });
-
+    readingPartsHelpButton.addEventListener("mouseenter", () => { if (!isReadingPartsExplanationFixed) readingPartsExplanation.classList.remove("hidden"); });
+    readingPartsHelpButton.addEventListener("mouseleave", () => { if (!isReadingPartsExplanationFixed) readingPartsExplanation.classList.add("hidden"); });
     readingPartsHelpButton.addEventListener("click", (event) => {
-        event.stopPropagation(); // ボタンクリックがbodyに伝播するのを防ぐ
-        isReadingPartsExplanationFixed = !isReadingPartsExplanationFixed; // 固定状態をトグル
-        if (isReadingPartsExplanationFixed) {
-            readingPartsExplanation.classList.remove("hidden");
-        } else {
-            readingPartsExplanation.classList.add("hidden");
-        }
+        event.stopPropagation();
+        isReadingPartsExplanationFixed = !isReadingPartsExplanationFixed;
+        if (isReadingPartsExplanationFixed) readingPartsExplanation.classList.remove("hidden");
+        else readingPartsExplanation.classList.add("hidden");
     });
-
-    // 読みのパーツヘルプが固定表示されているときに、それ以外の場所をクリックしたら非表示にする
     document.addEventListener("click", (event) => {
         if (isReadingPartsExplanationFixed && !readingPartsHelpButton.contains(event.target) && !readingPartsExplanation.contains(event.target)) {
             readingPartsExplanation.classList.add("hidden");
@@ -656,142 +194,115 @@
         }
     });
 
-    /**
-     * 単語追加モーダルを開きます。
-     */
+    // --- 単語追加モーダル関連のJavaScript ---
+    const addWordModal = document.getElementById("addWordModal");
+    const addWordForm = document.getElementById("addWordForm");
+    const readingPartsContainer = document.getElementById("readingPartsContainer");
+    
+    /** 単語追加モーダルを開きます。 */
     function openAddWordModal() {
       addWordModal.classList.remove("hidden");
-      // モーダルを開くときに、読みのパーツ入力を初期化（最低1つは表示）
-      readingPartsContainer.innerHTML = ''; // 既存のコンテンツをクリア
+      readingPartsContainer.innerHTML = '';
       addReadingPart(); // 初期ペアを追加
       updateGeneratedNumberAndReading(); // 開くときに動的に生成される数字と読みを更新
     }
 
-    /**
-     * 単語追加モーダルを閉じます。
-     */
+    /** 単語追加モーダルを閉じます。 */
     function closeAddWordModal() {
       addWordModal.classList.add("hidden");
-      addWordForm.reset(); // フォームをリセット
-      readingPartsContainer.innerHTML = ''; // 読みのパーツをクリア
+      addWordForm.reset();
+      readingPartsContainer.innerHTML = '';
       updateGeneratedNumberAndReading(); // クリア時に表示を更新 (「未入力」に戻る)
     }
 
-    /**
-     * 読みのパーツの入力フィールドのペアを動的に追加します。
-     * @param {string} initialDigit - 初期値として設定する数字 (オプション)
-     * @param {string} initialKanaId - 初期値として設定するカナID (オプション)
-     */
+    /** 読みのパーツの入力フィールドのペアを動的に追加します。 */
     function addReadingPart(initialDigit = '', initialKanaId = '') {
       const partDiv = document.createElement("div");
-      partDiv.className = "flex flex-wrap items-center gap-2"; // 横並び、必要に応じて改行
+      partDiv.className = "flex flex-wrap items-center gap-2";
 
-      // 数字入力
       const digitInput = document.createElement("input");
-      digitInput.type = "text"; // 数字も文字列として受け取れるように
+      digitInput.type = "text";
       digitInput.placeholder = "数字";
       digitInput.value = initialDigit;
       digitInput.className = "w-24 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400";
-      digitInput.required = true; // 必須に設定
-      digitInput.pattern = "^[0-9]+$"; // 数字のみ許可
+      digitInput.required = true;
+      digitInput.pattern = "^[0-9]+$";
       digitInput.title = "数字のみを入力してください。";
       
-      // 選択されたカナのIDを保持するための隠しフィールド
       const selectedKanaIdHiddenInput = document.createElement("input");
       selectedKanaIdHiddenInput.type = "hidden";
-      selectedKanaIdHiddenInput.className = "selected-kana-id-value"; // クラス名を追加して取得しやすくする
-      selectedKanaIdHiddenInput.required = true; // カナが選択されていることを必須にする
+      selectedKanaIdHiddenInput.className = "selected-kana-id-value";
+      selectedKanaIdHiddenInput.required = true;
       selectedKanaIdHiddenInput.value = initialKanaId;
 
-      // カナ候補を表示するコンテナ
       const kanaSuggestionsContainer = document.createElement("div");
       kanaSuggestionsContainer.className = "flex flex-wrap gap-1 border border-gray-200 p-2 rounded-lg bg-gray-50 flex-grow min-w-[150px]";
       
-      // 削除ボタン
       const removeButton = document.createElement("button");
       removeButton.type = "button";
       removeButton.textContent = "X";
       removeButton.className = "bg-red-400 text-white p-2 rounded-lg hover:bg-red-500 transition duration-200 shadow-md flex-shrink-0";
       removeButton.onclick = () => {
-        if (readingPartsContainer.children.length > 1) { // 少なくとも1つのパーツは残す
+        if (readingPartsContainer.children.length > 1) {
           partDiv.remove();
-          updateGeneratedNumberAndReading(); // 削除時に数字と読みを更新
-        } else {
-            alert("読みのパーツは少なくとも1つ必要です。"); 
-        }
+          updateGeneratedNumberAndReading();
+        } else { alert("読みのパーツは少なくとも1つ必要です。"); }
       };
 
       partDiv.appendChild(digitInput);
       partDiv.appendChild(kanaSuggestionsContainer);
-      partDiv.appendChild(selectedKanaIdHiddenInput); // 隠しフィールドを追加
+      partDiv.appendChild(selectedKanaIdHiddenInput);
       partDiv.appendChild(removeButton);
       readingPartsContainer.appendChild(partDiv);
 
-      // 数字入力時のイベントリスナー
       digitInput.addEventListener("input", () => {
-        // 数字入力時にカナ候補を更新し、それから全体の数字と読みを更新
         updateKanaSuggestions(digitInput, kanaSuggestionsContainer, selectedKanaIdHiddenInput, initialKanaId);
         updateGeneratedNumberAndReading(); 
       });
 
-      // 初期値がある場合は候補を生成
       if (initialDigit) {
         updateKanaSuggestions(digitInput, kanaSuggestionsContainer, selectedKanaIdHiddenInput, initialKanaId);
       }
     }
 
-    /**
-     * 数字入力に基づいてカナの候補ボタンを更新します。
-     * @param {HTMLInputElement} digitInput - 数字入力フィールド。
-     * @param {HTMLElement} kanaSuggestionsContainer - カナ候補ボタンを表示するコンテナ。
-     * @param {HTMLInputElement} selectedKanaIdHiddenInput - 選択されたカナIDを保持する隠しフィールド。
-     * @param {string} initialKanaId - 初期値として設定するカナID (ロード時用)
-     */
+    /** 数字入力に基づいてカナの候補ボタンを更新します。 */
     function updateKanaSuggestions(digitInput, kanaSuggestionsContainer, selectedKanaIdHiddenInput, initialKanaId = '') {
-      kanaSuggestionsContainer.innerHTML = ''; // 既存の候補をクリア
-      selectedKanaIdHiddenInput.value = ''; // 選択されたカナIDをクリア
+      kanaSuggestionsContainer.innerHTML = '';
+      selectedKanaIdHiddenInput.value = '';
       const digit = digitInput.value.trim();
 
-      if (digit === "") {
-        updateGeneratedNumberAndReading(); // 数字がクリアされた場合も更新
-        return; // 数字が入力されていない場合は何もしない
-      }
+      if (digit === "") { updateGeneratedNumberAndReading(); return; }
 
-      const kanaObjects = numberDict[digit]; // オブジェクトの配列を取得
+      const kanaObjects = numberDict[digit];
       if (kanaObjects && kanaObjects.length > 0) {
         kanaObjects.forEach(kanaObj => {
           const kanaButton = document.createElement("button");
           kanaButton.type = "button";
-          kanaButton.textContent = kanaObj.text; // カナのテキストを表示
-          kanaButton.dataset.kanaId = kanaObj.id; // ボタンにkana_idをセット
+          kanaButton.textContent = kanaObj.text;
+          kanaButton.dataset.kanaId = kanaObj.id;
 
           kanaButton.className = "px-2 py-1 rounded-md text-sm cursor-pointer border border-gray-300 bg-white hover:bg-blue-100 transition duration-150";
 
-          // 初期値または前回選択されたkana_idに基づいて選択状態を反映
           if (selectedKanaIdHiddenInput.value === kanaObj.id || (initialKanaId && initialKanaId === kanaObj.id)) {
             kanaButton.classList.add("bg-blue-500", "text-white", "hover:bg-blue-600");
             kanaButton.classList.remove("bg-white", "text-gray-800", "hover:bg-blue-100");
-            selectedKanaIdHiddenInput.value = kanaObj.id; // hidden inputも更新
+            selectedKanaIdHiddenInput.value = kanaObj.id;
           }
 
           kanaButton.addEventListener("click", () => {
-            // 他のボタンの選択状態を解除
             Array.from(kanaSuggestionsContainer.children).forEach(btn => {
               btn.classList.remove("bg-blue-500", "text-white", "hover:bg-blue-600");
               btn.classList.add("bg-white", "text-gray-800", "hover:bg-blue-100");
             });
-
-            // クリックされたボタンを選択状態にする
             kanaButton.classList.add("bg-blue-500", "text-white", "hover:bg-blue-600");
             kanaButton.classList.remove("bg-white", "text-gray-800", "hover:bg-blue-100");
 
-            selectedKanaIdHiddenInput.value = kanaObj.id; // 隠しフィールドに選択されたカナIDを設定
-            updateGeneratedNumberAndReading(); // カナ選択時に数字と読みを更新
+            selectedKanaIdHiddenInput.value = kanaObj.id;
+            updateGeneratedNumberAndReading();
           });
           kanaSuggestionsContainer.appendChild(kanaButton);
         });
       } else {
-        // 対応するカナがない場合
         const noKanaMessage = document.createElement("span");
         noKanaMessage.className = "text-sm text-gray-500";
         noKanaMessage.textContent = "対応するカナがありません";
@@ -799,9 +310,7 @@
       }
     }
 
-    /**
-     * 読みのパーツから動的に数字と読み（ひらがな）を生成し、表示を更新します。
-     */
+    /** 読みのパーツから動的に数字と読み（ひらがな）を生成し、表示を更新します。 */
     function updateGeneratedNumberAndReading() {
         let generatedNumber = '';
         let generatedKanaReading = '';
@@ -809,20 +318,17 @@
 
         partDivs.forEach(partDiv => {
             const digitInput = partDiv.querySelector('input[type="text"]');
-            const selectedKanaIdHiddenInput = partDiv.querySelector('.selected-kana-id-value'); // kanaIdで取得
+            const selectedKanaIdHiddenInput = partDiv.querySelector('.selected-kana-id-value');
 
             const digit = digitInput ? digitInput.value.trim() : '';
             const kanaId = selectedKanaIdHiddenInput ? selectedKanaIdHiddenInput.value.trim() : '';
 
-            // kanaIdからkana_textを取得
             let kanaText = '';
             if (digit && kanaId) {
                 const kanaObjects = numberDict[digit];
                 if (kanaObjects) {
                     const foundKanaObj = kanaObjects.find(obj => obj.id === kanaId);
-                    if (foundKanaObj) {
-                        kanaText = foundKanaObj.text;
-                    }
+                    if (foundKanaObj) { kanaText = foundKanaObj.text; }
                 }
             }
             generatedNumber += digit;
@@ -830,7 +336,7 @@
         });
 
         const generatedHiraganaReading = katakanaToHiragana(generatedKanaReading);
-        const currentWord = addWordInput.value.trim(); // addWordInputの値を取得
+        const currentWord = addWordInput.value.trim();
 
         const finalWordPreviewElement = document.getElementById("finalWordPreview");
         if (finalWordPreviewElement) {
@@ -842,222 +348,105 @@
         }
     }
 
-
-    /**
-     * 新しい単語を単語リストに追加します。
-     * @param {Event} event - フォーム送信イベント
-     */
-    addWordForm.addEventListener("submit", async (event) => { // asyncを追加
-      event.preventDefault(); // フォームのデフォルト送信を防止
+    /** 新しい単語を単語リストに追加します（Firestoreへ保存）。 */
+    addWordForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
 
       const word = document.getElementById("addWordInput").value.trim();
       const userName = document.getElementById("addUserName").value.trim();
 
-      // 読みのパーツの収集と検証
       const readingParts = [];
       let allReadingPartsValid = true;
-      let finalGeneratedNumber = ''; // 最終的な生成数字
-      let finalGeneratedKanaReading = ''; // 最終的な生成カナ読み
+      let finalGeneratedNumber = '';
+      let finalGeneratedKanaReading = '';
 
       const partDivs = readingPartsContainer.querySelectorAll(".flex.flex-wrap.items-center.gap-2");
-      
-      if (partDivs.length === 0) { // 読みのパーツが必須であることを確認
-          allReadingPartsValid = false;
-          alert("読みのパーツは少なくとも1つ必要です。");
-          return;
-      }
+      if (partDivs.length === 0) { allReadingPartsValid = false; alert("読みのパーツは少なくとも1つ必要です。"); return; }
 
       partDivs.forEach(partDiv => {
         const digitInput = partDiv.querySelector('input[type="text"]');
-        const selectedKanaIdHiddenInput = partDiv.querySelector('.selected-kana-id-value'); // kanaIdで取得
+        const selectedKanaIdHiddenInput = partDiv.querySelector('.selected-kana-id-value');
 
         const digit = digitInput ? digitInput.value.trim() : '';
         const kana_id = selectedKanaIdHiddenInput ? selectedKanaIdHiddenInput.value.trim() : '';
 
-        // kana_idからkana_textを取得
         let kana_text = '';
         if (digit && kana_id) {
             const kanaObjects = numberDict[digit];
             if (kanaObjects) {
                 const foundKanaObj = kanaObjects.find(obj => obj.id === kana_id);
-                if (foundKanaObj) {
-                    kana_text = foundKanaObj.text;
-                }
+                if (foundKanaObj) { kana_text = foundKanaObj.text; }
             }
         }
 
-        // 数字は数字のみ、カナIDとカナテキストは空でないことを確認
         if (!digit.match(/^[0-9]+$/) || kana_id === "" || kana_text === "") {
           allReadingPartsValid = false;
           alert("無効な読みのパーツ: 数字は数値、カナが選択されている必要があります。");
           return;
         }
-        // wordList.readingPartsにはdigitとkana_idのみを格納する
         readingParts.push({ digit: parseInt(digit), kana_id: kana_id });
-        finalGeneratedNumber += digit; // ここで最終的な数字を構築
-        finalGeneratedKanaReading += kana_text; // ここで最終的なカナ読みを構築
+        finalGeneratedNumber += digit;
+        finalGeneratedKanaReading += kana_text;
       });
 
-      if (!allReadingPartsValid) {
-        return; // 無効なパーツがあった場合はここで終了
-      }
+      if (!allReadingPartsValid) { return; }
 
-      const reading = katakanaToHiragana(finalGeneratedKanaReading); // 最終的なひらがな読みを生成
+      const reading = katakanaToHiragana(finalGeneratedKanaReading);
 
-      // 全てのフィールドが入力されているか、および形式が正しいかを確認
-      if (!word || !userName) {
-        alert("全ての必須項目を入力してください。");
-        return;
-      }
+      if (!word || !userName) { alert("全ての必須項目を入力してください。"); return; }
       
       const newWord = {
-        number: finalGeneratedNumber, // 生成された数字を使用
+        number: finalGeneratedNumber,
         word: word,
-        reading: reading, // 生成されたひらがな読みを使用
-        readingParts: readingParts, // digitとkana_idのみを含む
+        reading: reading,
+        readingParts: readingParts,
         likes: 0,
         stranges: 0,
         userName: userName
       };
 
-      // Firestoreへデータを追加
       try {
           // Firestoreにドキュメントを追加。IDはFirestoreが自動生成。
           const docRef = await addDoc(wordsCollection, newWord);
           console.log("Document written with ID: ", docRef.id);
           alert("単語がデータベースに追加されました！");
           
-          // クライアント側のwordListも更新（FirestoreのIDも保持）
+          // クライアント側のwordListにも追加（FirestoreのIDも保持）
           wordList.push({ id: docRef.id, ...newWord }); 
           
           closeAddWordModal();
-          search(false); // 検索結果を更新
+          // search(false); // 検索機能削除のためコメントアウト
       } catch (error) {
           console.error('Error adding word to Firestore:', error);
           alert('単語の保存中にエラーが発生しました。コンソールを確認してください。');
       }
     });
 
-    // addWordInputの変更を監視し、プレビューを更新
     addWordInput.addEventListener("input", updateGeneratedNumberAndReading);
 
 
-    // --- Firestoreからのデータ読み込み関数 ---
+    // --- Firestoreからのデータ読み込み関数（今回は初期データ取得のみでUI表示には直接使いません）---
     async function loadWordsFromFirestore() {
       try {
-        const q = query(wordsCollection); // wordsコレクションからクエリを作成
-        const querySnapshot = await getDocs(q); // ドキュメントのスナップショットを取得
+        const q = query(wordsCollection);
+        const querySnapshot = await getDocs(q);
         
-        wordList = []; // 既存のリストをクリア
+        wordList = [];
         querySnapshot.forEach((doc) => {
-          // ドキュメントIDとデータをwordListに追加
           wordList.push({ id: doc.id, ...doc.data() });
         });
-        console.log("Words loaded from Firestore:", wordList);
-        search(false); // 読み込んだデータで検索結果を更新
+        console.log("初期ロードされた単語数:", wordList.length);
+        // search(false); // 検索機能削除のためコメントアウト
       } catch (e) {
         console.error("Error loading documents from Firestore: ", e);
-        alert("単語リストの読み込みに失敗しました。デフォルトデータがあればそれを使用します。");
-        // エラー発生時のフォールバックとして、以前のデフォルトデータを設定するなどのロジックも検討
+        alert("初期単語リストの読み込みに失敗しました。");
       }
     }
-
 
     // ページの読み込みが完了したら初期化関数を呼び出す
     document.addEventListener("DOMContentLoaded", async () => { 
       await loadWordsFromFirestore(); // Firestoreから単語を読み込む
-      initializeGoros();
     });
-
-    // --- 初期データ投入 (開発時のみ実行推奨) ---
-    // あなたが持っている既存の wordList データをFirestoreに一度だけ投入したい場合、
-    // 以下の関数を呼び出すことができます。
-    // 注意: これを複数回実行すると、データが重複して追加されます。
-    // 完全に空のデータベースに対して一度だけ実行するか、
-    // 実行後はこの呼び出しをコメントアウトすることを強く推奨します。
-    
-    async function initialLoadExistingWordsToFirestore() {
-        const existingWordData = [
-            {
-                number: "310",
-                word: "砂糖",
-                reading: "さとう",
-                readingParts: [{ digit: 3,  kana_id: "3_サ"  }, { digit: 10, kana_id: "10_トウ"}],
-                likes: 0, stranges: 0, userName: "デフォルト"
-            },
-            {
-                number: "104",
-                word: "イワシ",
-                reading: "いわし",
-                readingParts: [{ digit: 1,  kana_id: "1_イ"  }, { digit: 0, kana_id: "0_ワ"}, { digit: 4, kana_id: "4_シ"}],
-                likes: 0, stranges: 0, userName: "デフォルト"
-            },
-            {
-                number: "8181",
-                word: "バイバイ",
-                reading: "ばいばい",
-                readingParts: [{ digit: 8, kana_id: "8_バイ"}, { digit: 8, kana_id: "8_バイ"}],
-                likes: 0, stranges: 0, userName: "デフォルト"
-            },
-            {
-                number: "4649",
-                word: "よろしく",
-                reading: "よろしく",
-                readingParts: [{ digit: 4, kana_id: "4_ヨ"}, { digit: 6, kana_id: "6_ロ"}, { digit: 4, kana_id: "4_シ"}, { digit: 9, kana_id: "9_ク"}],
-                likes: 0, stranges: 0, userName: "デフォルト"
-            },
-            {
-                number: "5963",
-                word: "ご苦労さん",
-                reading: "ごくろうさん",
-                readingParts: [{ digit: 5, kana_id: "5_ゴ"}, { digit: 9, kana_id: "9_ク"}, { digit: 6, kana_id: "6_ロ"}, { digit: 3, kana_id: "3_ウ"}, { digit: 3, kana_id: "3_サン"}],
-                likes: 0, stranges: 0, userName: "デフォルト"
-            },
-            {
-                number: "265",
-                word: "にろこ",
-                reading: "にろこ",
-                readingParts: [{ digit: 2, kana_id: "2_ニ"}, { digit: 6, kana_id: "6_ロ"}, { digit: 5, kana_id: "5_コ"}],
-                likes: 0, stranges: 0, userName: "デフォルト"
-            },
-            {
-                number: "040",
-                word: "およお",
-                reading: "およお",
-                readingParts: [{ digit: 0, kana_id: "0_オ"}, { digit: 4, kana_id: "4_ヨ"}, { digit: 0, kana_id: "0_オ"}],
-                likes: 0, stranges: 0, userName: "デフォルト"
-            },
-            {
-                number: "000",
-                word: "まるまるまる",
-                reading: "まるまるまる",
-                readingParts: [{ digit: 0, kana_id: "0_マル"}, { digit: 0, kana_id: "0_マル"}, { digit: 0, kana_id: "0_マル"}],
-                likes: 0, stranges: 0, userName: "デフォルト"
-            },
-            {
-                number: "2424",
-                word: "にんしにんし", 
-                reading: "にんしにんし", 
-                readingParts: [{ digit: 2, kana_id: "2_ニ" }, { digit: 4, kana_id: "4_シ" }, { digit: 2, kana_id: "2_ジ" }, { digit: 4, kana_id: "4_ジ" }],
-                likes: 0, stranges: 0, userName: "テストユーザー"
-            }
-        ];
-
-        console.log("初期データをFirestoreにロード中...");
-        for (const word of existingWordData) {
-            try {
-                await addDoc(wordsCollection, word);
-                console.log(`単語 "${word.word}" を追加しました。`);
-            } catch (e) {
-                console.error(`単語 "${word.word}" の追加に失敗しました: `, e);
-            }
-        }
-        console.log("初期データのロードが完了しました。");
-        loadWordsFromFirestore(); // ロード後に再読み込みしてUIを更新
-    }
-    // initialLoadExistingWordsToFirestore(); // 開発時に一度だけ実行したい場合にコメントを外す
-    
-
   </script>
 </body>
 </html>
